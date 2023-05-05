@@ -62,11 +62,9 @@ def integrate_refractivity(dataset: xr.Dataset) -> xr.Dataset:
         # reverse heights so we integrate from satellite to ground (high -> low)
         dataset = dataset.reindex(height=list(reversed(dataset.height)))
     # calculate integrated refractivity index from high to low at each lat, long
-    integrated_N = integrate.cumtrapz(dataset['N'], x = dataset['height'])
-    # get first value to pad integration from highest and next highest value
-    start_val = 2*integrated_N[:, :, :, 0] - integrated_N[:, :, :, 1]
+    integrated_N = integrate.cumtrapz(dataset['N'], x = dataset['height'], initial = 0)
     # insert as new variable cumulative refractivity index
-    dataset['cum_N'] = (['time', 'longitude', 'latitude', 'height'], np.insert(integrated_N, 0, start_val, -1))
+    dataset['cum_N'] = (['time', 'longitude', 'latitude', 'height'], integrated_N)
 
     return dataset
 
