@@ -1,12 +1,12 @@
 import cdsapi
+import numpy as np
 import pandas as pd
-import xarray as xr
 from shapely import geometry
 from pathlib import Path
 from datetime import datetime
 from typing import Union
 
-def download_era(date: pd.Timestamp, out_dir: Union[str, Path], subset: Union[geometry.Polygon, None]) -> Path:
+def download_era(date: pd.Timestamp, out_dir: Union[str, Path], subset: Union[geometry.Polygon, None], LOS: bool = False) -> Path:
     """
     Download era5 weather model for specific hourly timestep as netcdf. Can be subset to a specific geographic subset.
 
@@ -35,17 +35,17 @@ def download_era(date: pd.Timestamp, out_dir: Union[str, Path], subset: Union[ge
     '700','750','775','800','825', '850','875','900','925','950','975','1000']
 
     if isinstance(date, str): date = pd.to_datetime(date)
-    assert date < datetime.now(), "provided date is in the future"
-    assert date > pd.to_datetime('1940-01-01'), "provided date is before january 1940"
+    assert date < datetime.now(date.tzinfo), "provided date is in the future"
+    assert date.year > 1939, "provided date is before january 1940"
 
     indict = {'product_type'   :'reanalysis',\
                 'format'         :'netcdf',\
                 'variable'       :['geopotential','temperature', humidparam],\
                 'pressure_level' : era_pressure_lvls, \
-                'date'           : date.strftime('%Y-%M-%d'),
+                'date'           : date.strftime('%Y-%m-%d'),
                 'time'           : date.strftime('%H:00')}
 
-    out_fp = out_dir.joinpath(f"ERA5_{date.strftime('%Y-%M-%dT%H:00')}.nc")
+    out_fp = out_dir.joinpath(f"ERA5_{date.strftime('%Y-%m-%dT%H:00')}.nc")
 
     if subset:
         w, s, e, n = subset.bounds
@@ -53,8 +53,13 @@ def download_era(date: pd.Timestamp, out_dir: Union[str, Path], subset: Union[ge
         assert e > -180 and e < 180, f"East bound: {e} is outside of globe"
         assert n > -90 and n < 90, f"North bound: {n} is outside of globe"
         assert s > -90 and w < 90, f"South bound: {s} is outside of globe"
+        if LOS:
+            w = np.maximum(w - abs(e - w), -180)
+            e = np.minimum(e + abs(e - w), 180)
+            s = np.maximum(s - abs(n - s), -90)
+            n = np.minimum(n + abs(n - s), 90)
         indict['area'] = f'/'.join([str(b) for b in [n, w, s, e]])
-        out_fp = out_fp.with_stem(f"{out_fp.stem}_{'_'.join([str(b) for b in subset.bounds])}")
+        out_fp = out_fp.with_stem(f"{out_fp.stem}_{'_'.join([f'{b:.2f}' for b in [w, s, e, n]])}")
 
     c.retrieve('reanalysis-era5-pressure-levels', indict, target = out_fp)
 
