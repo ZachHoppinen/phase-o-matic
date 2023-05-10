@@ -15,6 +15,7 @@ This code is adapted from the awesome atmospheric phase delay repo: https://gith
 ## Usage
 
 ```python
+import xarray as xr
 from phase_o_matic import presto_phase_delay
 
 dem_dataset = xr.open_dataset('../pyAPS_data/pyaps_geom.nc')
