@@ -14,7 +14,7 @@ This code is adapted from the awesome atmospheric phase delay repo: https://gith
 
 ## Usage
 
-This example usage is also available in the `notebooks/usage.ipynb`
+This example usage is also available in `notebooks/usage.ipynb`
 
 ```python
 import sys
