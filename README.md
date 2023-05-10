@@ -16,6 +16,8 @@ This code is adapted from the awesome atmospheric phase delay repo: https://gith
 
 ```python
 import xarray as xr
+import matplotlib.pyplot as plt
+
 from phase_o_matic import presto_phase_delay
 
 dem_dataset = xr.open_dataset('../pyAPS_data/pyaps_geom.nc')
@@ -25,5 +27,7 @@ t2 = presto_phase_delay(date = '2020-01-10', geometry = dem_dataset, work_dir = 
 
 delay_change = t2.isel(time = 0)['delay'] - t1.isel(time = 0)['delay']
 
-delay_change.plot()
+fig, axes = plt.subplots(1, 2, figsize = (12, 9))
+delay_change.plot(ax = axes[0], vmax = 0, vmin = -4)
+dem_dataset['dem'].plot(ax = axes[1], vmin = 0, vmax = 2000)
 ```
