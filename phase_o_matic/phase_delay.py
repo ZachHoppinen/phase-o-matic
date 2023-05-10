@@ -116,7 +116,7 @@ def get_delay(dataset: xr.Dataset, geometry: xr.Dataset, wavelength: float = 4*n
     Args:
     ds: xarray dataset of atmosphere with refractive indexes calculated
     geometry: xarray dataset of elevations (var_name = 'dem'), incidence angles in radians (var_name = 'inc')
-        and coords for "lat" and "lon".
+        and coords for "y" and "x".
     wavelength: either default 4 * pi (returns meters of delay) or radar wavelength in meters (returns radians)
 
     Returns:
@@ -133,7 +133,7 @@ def get_delay(dataset: xr.Dataset, geometry: xr.Dataset, wavelength: float = 4*n
     dataset = dataset.interp(height = np.round(np.arange(geometry['dem'].min() - 2, geometry['dem'].max() + 2)), method = 'linear')
 
     # interpolate across the dem's lats, longs, and elevations to find the surface delay
-    dataset = dataset.interp(latitude = geometry.lat, longitude = geometry.lon, height = geometry['dem'])
+    dataset = dataset.interp(latitude = geometry.y, longitude = geometry.x, height = geometry['dem'])
 
     # add phase delay data_variable
     dataset['delay'] = dataset['N']*np.pi*4.0/(wavelength*geometry['inc'])
