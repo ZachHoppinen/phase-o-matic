@@ -14,20 +14,31 @@ This code is adapted from the awesome atmospheric phase delay repo: https://gith
 
 ## Usage
 
+This example usage is also available in the `notebooks/usage.ipynb`
+
 ```python
+import sys
 import xarray as xr
 import matplotlib.pyplot as plt
 
+# this relative path assumes you are in the notebooks directory
+sys.path.append('..')
 from phase_o_matic import presto_phase_delay
 
+# this relative path assumes you are in the notebooks directory
+# the dem_datset is a netcdf that should have a 'dem' variable and an
+# incidence angle data variable 'inc' in radians
 dem_dataset = xr.open_dataset('../pyAPS_data/pyaps_geom.nc')
 
-t1 = presto_phase_delay(date = '2020-01-03', geometry = dem_dataset, work_dir = '../data/test/', wavelength = 0.238403545)
-t2 = presto_phase_delay(date = '2020-01-10', geometry = dem_dataset, work_dir = '../data/test/', wavelength = 0.238403545)
+work_dir = '../pyAPS_data/example'
+
+t1 = presto_phase_delay(date = '2020-01-03', geometry = dem_dataset, work_dir = work_dir, wavelength = 0.238403545)
+t2 = presto_phase_delay(date = '2020-01-10', geometry = dem_dataset, work_dir = work_dir, wavelength = 0.238403545)
 
 delay_change = t2.isel(time = 0)['delay'] - t1.isel(time = 0)['delay']
 
 fig, axes = plt.subplots(1, 2, figsize = (12, 9))
 delay_change.plot(ax = axes[0], vmax = 0, vmin = -4)
 dem_dataset['dem'].plot(ax = axes[1], vmin = 0, vmax = 2000)
+plt.show()
 ```
