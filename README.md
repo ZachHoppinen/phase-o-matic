@@ -11,3 +11,18 @@ Useful publications for this repo:
 This code is adapted from the awesome atmospheric phase delay repo: https://github.com/insarlab/PyAPS utilizing xarray.
 
 <img src="https://github.com/ZachKeskinen/phase-o-matic/blob/main/images/pyaps_phaseo_compare.png">
+
+## Usage
+
+```python
+from phase_o_matic import presto_phase_delay
+
+dem_dataset = xr.open_dataset('../pyAPS_data/pyaps_geom.nc')
+
+t1 = presto_phase_delay(date = '2020-01-03', geometry = dem_dataset, work_dir = '../data/test/', wavelength = 0.238403545)
+t2 = presto_phase_delay(date = '2020-01-10', geometry = dem_dataset, work_dir = '../data/test/', wavelength = 0.238403545)
+
+delay_change = t2.isel(time = 0)['delay'] - t1.isel(time = 0)['delay']
+
+delay_change.plot()
+```
