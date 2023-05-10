@@ -8,7 +8,7 @@ Useful publications for this repo:
 
  - Hu, Z. and Mallorquí, J. J.: An Accurate Method to Correct Atmospheric Phase Delay for InSAR with the ERA5 Global Atmospheric Model, Remote Sens-basel, 11, 1969, https://doi.org/10.3390/rs11171969, 2019.
 
-This code is adapted from the awesome atmospheric phase delay repo: https://github.com/insarlab/PyAPS utilizing xarray.
+This code is adapted from the awesome atmospheric phase delay repo: https://github.com/insarlab/PyAPS.
 
 <img src="https://github.com/ZachKeskinen/phase-o-matic/blob/main/images/pyaps_phaseo_compare.png">
 
