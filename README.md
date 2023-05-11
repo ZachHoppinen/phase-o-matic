@@ -1,7 +1,5 @@
 # phase-o-matic
-[![LICENSE](https://img.shields.io/badge/license-MIT-blue)](https://img.shields.io/badge/license-MIT-blue)
-
-[![DOI](https://zenodo.org/badge/636333382.svg)](https://zenodo.org/badge/latestdoi/636333382)
+[![LICENSE](https://img.shields.io/badge/license-MIT-blue)](https://img.shields.io/badge/license-MIT-blue) [![DOI](https://zenodo.org/badge/636333382.svg)](https://zenodo.org/badge/latestdoi/636333382)
 
 Python package for calculating Interferometric Synthetic Aperture Radar phase delays from ERA5 atmospheric models. Utilizes xarray to easily download, processes, and add phase delays to netcdfs of InSAR Phase. 
 
