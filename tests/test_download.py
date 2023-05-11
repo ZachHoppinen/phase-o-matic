@@ -22,7 +22,7 @@ class TestEraDownload(unittest.TestCase):
         """
         area, ts, out_dir = params
 
-        out_fp = download_era(date = ts, out_dir = out_dir, subset = area)
+        out_fp = download_era(date = ts, out_dir = out_dir, subset = area, humid_param ='specific_humidity')
 
         ds = xr.open_dataset(out_fp)
 

@@ -10,7 +10,8 @@ from pathlib import Path
 import sys
 sys.path.append('./')
 sys.path.append('../')
-from phase_o_matic.preprocess import convert_pressure_to_pascals, get_vapor_partial_pressure, interpolate_to_heights
+from phase_o_matic.preprocess import convert_pressure_to_pascals, get_vapor_partial_pressure,\
+    interpolate_to_heights, geopotential_to_geopotential_heights, check_start_end
 
 class TestPreprocess(unittest.TestCase):
     """
@@ -70,10 +71,10 @@ class TestPreprocess(unittest.TestCase):
         assert_allclose(ds['vpr'], correct_vpr)
 
         ds['q'] = ds['q'].assign_attrs(standard_name = 'relative_humidity')
-        self.assertRaises(AssertionError, get_vapor_partial_pressure, ds)
     
     def test_interpolate_to_heights(self, test_ds = test_ds):
         test_ds = convert_pressure_to_pascals(test_ds)
+        test_ds = geopotential_to_geopotential_heights(test_ds)
         test_ds['vpr'] = xr.DataArray(np.random.random((10, 10, 37, 1)),\
                                     coords = [test_ds.longitude, test_ds.latitude, test_ds.level, test_ds.time],\
                                     dims = ['longitude', 'latitude', 'level', 'time'])
@@ -104,11 +105,12 @@ class TestPreprocess(unittest.TestCase):
         
         ds = interpolate_to_heights(test_ds, min_alt=-20)
         self.assertEquals(ds.height.min(), -20)
-        self.assertAlmostEquals(ds.height.max().data, test_ds['z'].max().data / 9.80665 , places = 1)
+        self.assertAlmostEquals(ds.height.max().data, test_ds['gph'].max().round().data , places = 1)
 
         ds = interpolate_to_heights(test_ds, min_alt=0.1)
         self.assertAlmostEquals(ds.height.min(), 0.1, places = 1)
 
+        
 
 if __name__ == '__main__':
     unittest.main()

@@ -116,33 +116,33 @@ def check_start_end(hx, min_alt, max_alt):
     Check if we need to extend hx to cover min alt to max alt
     Included to test relative to pyaps but probably not neccessary
     """
-    sFlag = False
-    eFlag = False
+    start_flag = False
+    end_flag = False
     #Add point at start
     if (hx.min() > min_alt):
-        sFlag = True
+        start_flag = True
         #changed from 1 to 0 (-1 should also work), CL
-        hx = np.concatenate((hx,[min_alt-1]),axis = 0)
+        hx = np.concatenate(([min_alt-1], hx),axis = 0)
 
     #Add point at end
     if (hx.max() < max_alt):
-        eFlag = True
+        end_flag = True
         #changed from 1 to 0 (-1 should also work), CL
-        hx = np.concatenate(([max_alt+1],hx),axis=0)
+        hx = np.concatenate((hx,[max_alt+1]),axis=0)
     
-    return hx, sFlag, eFlag
+    return hx, start_flag, end_flag
 
-def hy_extend(hx, hy, sFlag, eFlag):
+def hy_extend(hx, hy, start_flag, end_flag):
     """
     Extend hy to cover full range of min to max altitude.
     Included to test relative to pyaps but probably not neccessary
     """
-    if (sFlag == True):
+    if (start_flag == True):
         val = hy[-1] +(hx[-1] - hx[-2])* (hy[-1] - hy[-2])/(hx[-2]-hx[-3])
         #changed from 1 to 0 (-1 should also work), CL
         hy = np.concatenate((hy,[val]),axis=0)
 
-    if (eFlag == True):
+    if (end_flag == True):
         val = hy[0] - (hx[0] - hx[1]) * (hy[0] - hy[1])/(hx[1]-hx[2])
         #changed from 1 to 0 (-1 should also work), CL
         hy = np.concatenate(([val],hy),axis=0)
@@ -174,14 +174,11 @@ def interpolate_to_heights(dataset: xr.Dataset, min_alt = -200, n_heights = 300,
     # create empty array to hold interpolated data but with n heights instead of 37 pressure levels
     new_size = (dataset['time'].size, dataset['longitude'].size, dataset['latitude'].size, n_heights)
 
-    humidity_var = 'q' if 'q' in dataset.data_vars else 'r'
-
     interpolated_ds = xr.Dataset(
             {
                 'air_pressure': (['time','longitude', 'latitude','height'], np.zeros(new_size), dataset['level'].attrs),
                 'temperature': (['time', 'longitude', 'latitude','height'], np.zeros(new_size), dataset['t'].attrs),
                 'vapor_pressure': (['time', 'longitude', 'latitude','height'], np.zeros(new_size), dataset['vpr'].attrs),
-                'humidity': (['time', 'longitude', 'latitude','height'], np.zeros(new_size), dataset[humidity_var].attrs),
             },  
             coords = {
                 "longitude" : (["longitude"], dataset['longitude'].data, dataset['longitude'].attrs),
@@ -196,10 +193,9 @@ def interpolate_to_heights(dataset: xr.Dataset, min_alt = -200, n_heights = 300,
     for time in dataset.time:
         for lon in dataset.longitude:
             for lat in dataset.latitude:
-
+                
                 # get geopotential height for each pressure level at this lat and long
                 hx = dataset['gph'].sel(time = time).sel(latitude = lat, longitude = lon)
-                hx, sFlag, eFlag = check_start_end(hx, min_alt, max_alt)
 
                 # convert those geopotential heights to ellipsoidal WGS84 heights
                 # skipped to match pyAPS
@@ -207,7 +203,6 @@ def interpolate_to_heights(dataset: xr.Dataset, min_alt = -200, n_heights = 300,
 
                 # interpolate pressure levels to pressure at each height
                 hy = dataset['level']
-                hy = hy_extend(hx, hy, sFlag, eFlag)
                 # make cubic interpolator
                 tck = interpolate.interp1d(hx, hy, axis = -1, kind = 'cubic', fill_value = "extrapolate")
                 # interpolate what pressure would occur at each height
@@ -217,21 +212,12 @@ def interpolate_to_heights(dataset: xr.Dataset, min_alt = -200, n_heights = 300,
 
                 # interpolate temperatures to temperature at each height level
                 hy = dataset['t'].sel(time = time).sel(latitude = lat, longitude = lon).data
-                hy = hy_extend(hx, hy, sFlag, eFlag)
                 tck = interpolate.interp1d(hx, hy, axis = -1, kind = 'cubic', fill_value = "extrapolate")
                 interpolated_temperatures = tck(heights)
                 interpolated_ds['temperature'].loc[{'time': time,  'latitude': lat, 'longitude': lon}] =  xr.DataArray(interpolated_temperatures, coords = [heights], dims = 'height')
-
-                # interpolate humidity to humidity at each height level
-                hy = dataset[humidity_var].sel(time = time).sel(latitude = lat, longitude = lon).data
-                hy = hy_extend(hx, hy, sFlag, eFlag)
-                tck = interpolate.interp1d(hx, hy, axis = -1, kind = 'cubic', fill_value = "extrapolate")
-                interpolated_vapor= tck(heights)
-                interpolated_ds['humidity'].loc[{'time': time,  'latitude': lat, 'longitude': lon}] =  xr.DataArray(interpolated_vapor, coords = [heights], dims = 'height')
                 
                 # interpolate vapor pressures to vapor pressures at each height level
                 hy = dataset['vpr'].sel(time = time).sel(latitude = lat, longitude = lon).data
-                hy = hy_extend(hx, hy, sFlag, eFlag)
                 tck = interpolate.interp1d(hx, hy, axis = -1, kind = 'cubic', fill_value = "extrapolate")
                 interpolated_vapor= tck(heights)
                 interpolated_ds['vapor_pressure'].loc[{'time': time,  'latitude': lat, 'longitude': lon}] =  xr.DataArray(interpolated_vapor, coords = [heights], dims = 'height')

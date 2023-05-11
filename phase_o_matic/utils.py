@@ -10,6 +10,8 @@ def regrid_twoD_coords(dA: xr.DataArray):
     dataarray must have dims x and y and coordinates lat and lon both of which are 
     a function of the x and the y dimensions.
 
+    This might be a better approach: https://gis.stackexchange.com/questions/455149/interpolate-irregularly-sampled-data-to-a-regular-grid
+
     Args:
     dA: xarray dataarray with 2d coordinates of "lat" and "lon" in wgs84
     and dims of "x" and "y".

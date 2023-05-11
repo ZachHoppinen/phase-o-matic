@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Union
 
-def download_era(date: pd.Timestamp, out_dir: Union[str, Path], subset: Union[geometry.Polygon, None], humid_param = 'relative_humidity', LOS: bool = False) -> Path:
+def download_era(date: pd.Timestamp, out_dir: Union[str, Path], subset: Union[geometry.Polygon, None], humid_param = 'specific_humidity', LOS: bool = False) -> Path:
     """
     Download era5 weather model for specific hourly timestep as netcdf. Can be subset to a specific geographic subset.
 
