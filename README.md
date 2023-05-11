@@ -19,7 +19,6 @@ This code and ERA data registration instructions are adapted from the awesome at
 
 ### Pip installation
 ```bash
-# not implemented yet. Please just add the home directory of this repo to your path
 pip install phase_o_matic
 ```
 
