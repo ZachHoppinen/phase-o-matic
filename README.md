@@ -1,7 +1,7 @@
 # phase-o-matic
-[![PIP]([[https://img.shields.io/badge/license-MIT-blue](https://img.shields.io/badge/pip-0.0.7-purple)
+[![PIP](https://img.shields.io/badge/license-MIT-blue)](https://img.shields.io/badge/pip-0.0.7-purple)
 
-[![LICENSE]([[https://img.shields.io/badge/license-MIT-blue](https://img.shields.io/badge/license-MIT-orange)
+[![LICENSE](https://img.shields.io/badge/license-MIT-blue)](https://img.shields.io/badge/license-MIT-orange)
 
 [![DOI](https://zenodo.org/badge/636333382.svg)](https://zenodo.org/badge/latestdoi/636333382) 
 
