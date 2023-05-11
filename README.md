@@ -22,17 +22,17 @@ pip install phase_o_matic
 
 ### ERA5 Data Registration
 
-(ERA5)[https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels] is atmospheric data distributed by the Copernicus Climate Change Service. You must register for an account and save the provided locally where you are downloading.
+[ERA5](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels) is atmospheric data distributed by the Copernicus Climate Change Service. You must register for an account and save the provided locally where you are downloading.
 
-1. (Create an account)[https://cds.climate.copernicus.eu/user/register] with the Copernicus Climate Data Servce.
+1. [Create an account](https://cds.climate.copernicus.eu/user/register) with the Copernicus Climate Data Servce.
 2. Next create a new file in your home directory called `.cdsapirc` with the following text:
 
 ```
 url: https://cds.climate.copernicus.eu/api/v2
-key: 12345:abcdefghij-134-abcdefgadf-82391b9d3f
+key: *12345*:*abcdefghij-134-abcdefgadf-82391b9d3f*
 ```
 
-Where you have replaced 12345 with your previous user ID and the part behind the colon (abcdefghij-134-abcdefgadf-82391b9d3f) with your personal API key. (More details)[https://cds.climate.copernicus.eu/api-how-to]
+Where you have replaced *12345* with your previous user ID and the part behind the colon (*abcdefghij-134-abcdefgadf-82391b9d3f*) with your personal API key. [More details](https://cds.climate.copernicus.eu/api-how-to)
 
 3. Make sure you have accepted the data licences Terms on the ECMWF website
 
