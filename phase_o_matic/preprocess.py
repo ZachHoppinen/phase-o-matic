@@ -1,7 +1,6 @@
 import numpy as np
 import xarray as xr
 from scipy import interpolate
-import pyproj
 
 from typing import Union
 
