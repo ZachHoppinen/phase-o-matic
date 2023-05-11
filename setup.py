@@ -11,6 +11,12 @@ python3 -m build
 twine upload dist/*
 
 in the home directory of this file.
+
+to have github auto-release:
+https://dev.to/iamtekson/publish-package-to-pypi-and-release-new-version-using-github-actions-108k
+
+git tag -a "v0.0.6" -m "new tag"
+git push --tags
 """
 
 import io
@@ -111,7 +117,7 @@ class UploadCommand(Command):
 # Where the magic happens:
 setup(
     name=NAME,
-    version=about['__version__'],
+    version={{VERSION_PLACEHOLDER}},
     description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type='text/markdown',
