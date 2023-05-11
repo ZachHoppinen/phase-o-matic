@@ -12,6 +12,30 @@ This code is adapted from the awesome atmospheric phase delay repo: https://gith
 
 <img src="https://github.com/ZachKeskinen/phase-o-matic/blob/main/images/pyaps_phaseo_compare.png">
 
+## Installation
+
+### Pip installation
+```bash
+# not implemented yet. Please just add the home directory of this repo to your path
+pip install phase_o_matic
+```
+
+### ERA5 Data Registration
+
+(ERA5)[https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels] is atmospheric data distributed by the Copernicus Climate Change Service. You must register for an account and save the provided locally where you are downloading.
+
+1. (Create an account)[https://cds.climate.copernicus.eu/user/register] with the Copernicus Climate Data Servce.
+2. Next create a new file in your home directory called `.cdsapirc` with the following text:
+
+```
+url: https://cds.climate.copernicus.eu/api/v2
+key: 12345:abcdefghij-134-abcdefgadf-82391b9d3f
+```
+
+Where you have replaced 12345 with your previous user ID and the part behind the colon (abcdefghij-134-abcdefgadf-82391b9d3f) with your personal API key. (More details)[https://cds.climate.copernicus.eu/api-how-to]
+
+3. Make sure you have accepted the data licences Terms on the ECMWF website
+
 ## Usage
 
 This example usage is also available in `notebooks/usage.ipynb`
@@ -42,3 +66,11 @@ delay_change.plot(ax = axes[0], vmax = 0, vmin = -4)
 dem_dataset['dem'].plot(ax = axes[1], vmin = 0, vmax = 2000)
 plt.show()
 ```
+
+## Citations
+
+If you end up using the ERA5 data please cite this repo:
+COMING!
+
+and the ERA5 data citation:
+Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Horányi, A., Muñoz Sabater, J., Nicolas, J., Peubey, C., Radu, R., Rozum, I., Schepers, D., Simmons, A., Soci, C., Dee, D., Thépaut, J-N. (2023): ERA5 hourly data on single levels from 1940 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS), DOI: 10.24381/cds.adbb2d47
