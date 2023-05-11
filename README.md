@@ -25,7 +25,12 @@ pip install phase_o_matic
 [ERA5](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels) is atmospheric data distributed by the Copernicus Climate Change Service. You must register for an account and save the provided locally where you are downloading.
 
 1. [Create an account](https://cds.climate.copernicus.eu/user/register) with the Copernicus Climate Data Servce.
-2. Next create a new file in your home directory called `.cdsapirc` with the following text:
+2. Next create a new file in your home directory called `.cdsapirc` 
+```bash
+cd ~
+nano .cdsapirc
+```
+with the following text:
 
 ```
 url: https://cds.climate.copernicus.eu/api/v2
