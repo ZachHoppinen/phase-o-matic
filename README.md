@@ -78,6 +78,9 @@ plt.show()
 ## Citations
 
 If you end up using the ERA5 data please cite this repo:
+
 Keskinen, Z. (2023) Phase-o-matic: InSAR atmospheric delay calculations, https://github.com/ZachKeskinen/phase-o-matic/. DOI: 10.5281/zenodo.7926686
+
+and the ERA5 data citation:
 
 Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Horányi, A., Muñoz Sabater, J., Nicolas, J., Peubey, C., Radu, R., Rozum, I., Schepers, D., Simmons, A., Soci, C., Dee, D., Thépaut, J-N. (2023): ERA5 hourly data on single levels from 1940 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS), DOI: 10.24381/cds.adbb2d47
