@@ -117,7 +117,7 @@ class UploadCommand(Command):
 # Where the magic happens:
 setup(
     name=NAME,
-    version={{VERSION_PLACEHOLDER}},
+    version='{{VERSION_PLACEHOLDER}}',
     description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type='text/markdown',
