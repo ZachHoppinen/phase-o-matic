@@ -34,7 +34,7 @@ with the following text:
 
 ```
 url: https://cds.climate.copernicus.eu/api/v2
-key: *12345*:*abcdefghij-134-abcdefgadf-82391b9d3f*
+key: 12345*abcdefghij-134-abcdefgadf-82391b9d3f
 ```
 
 Where you have replaced *12345* with your previous user ID and the part behind the colon (*abcdefghij-134-abcdefgadf-82391b9d3f*) with your personal API key. [More details](https://cds.climate.copernicus.eu/api-how-to)
