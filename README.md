@@ -2,7 +2,7 @@
 [![PIP](https://img.shields.io/badge/pip-0.0.8-purple)](https://img.shields.io/badge/pip-0.0.8-purple)
 [![LICENSE](https://img.shields.io/badge/license-MIT-orange)](https://img.shields.io/badge/license-MIT-orange)
 [![DOI](https://zenodo.org/badge/636333382.svg)](https://zenodo.org/badge/latestdoi/636333382) 
-[![COVERAGE](https://img.shields.io/badge/coverage-89%-green)](https://img.shields.io/badge/coverage-89%-green) 
+[![COVERAGE](https://img.shields.io/badge/coverage-89%25-green)](https://img.shields.io/badge/coverage-89%25-green) 
 
 
 Python package for calculating Interferometric Synthetic Aperture Radar phase delays from ERA5 atmospheric models. Utilizes xarray to easily download, processes, and add phase delays to netcdfs of InSAR Phase.
