@@ -1,5 +1,5 @@
 # phase-o-matic
-[![PIP](https://img.shields.io/badge/pip-0.0.7-purple)](https://img.shields.io/badge/pip-0.0.7-purple)
+[![PIP](https://img.shields.io/badge/pip-0.0.8-purple)](https://img.shields.io/badge/pip-0.0.8-purple)
 [![LICENSE](https://img.shields.io/badge/license-MIT-orange)](https://img.shields.io/badge/license-MIT-orange)
 [![DOI](https://zenodo.org/badge/636333382.svg)](https://zenodo.org/badge/latestdoi/636333382) 
 
