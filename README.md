@@ -76,7 +76,7 @@ plt.savefig('../images/usage.png')
 
 ## Coverage instructions
 
-Run the following from the main directory of this file to get a coverage report.
+Run the following from the root directory of this project to get a coverage report.
 
 You will need to have the dependencies and `coverage` packages available.
 
