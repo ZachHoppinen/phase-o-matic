@@ -15,7 +15,7 @@ from phase_o_matic.preprocess import convert_pressure_to_pascals, get_vapor_part
 
 class TestPreprocess(unittest.TestCase):
     """
-    Test functionality of downloading ERA5 model data
+    Test functionality of preprocessing datasets
     """
 
     levels = ['1','2','3','5','7','10','20','30','50', '70','100','125',\
@@ -41,7 +41,7 @@ class TestPreprocess(unittest.TestCase):
 
     def test_pascal_convert(self, test_ds = test_ds):
         """
-        Test downloading era5 data
+        Test converting to pascals from bars
         """
         original = test_ds.copy(deep = True)
         ds = convert_pressure_to_pascals(test_ds)
@@ -58,7 +58,7 @@ class TestPreprocess(unittest.TestCase):
     
     def test_vapor_pressure_calc(self, test_ds = test_ds):
         """
-        Tests for succesful calculation of vapour partial pressure
+        Test for succesful calculation of vapour partial pressure
         from specific humidity
         """
         original = test_ds.copy(deep = True)
@@ -72,7 +72,23 @@ class TestPreprocess(unittest.TestCase):
 
         ds['q'] = ds['q'].assign_attrs(standard_name = 'relative_humidity')
     
+    def test_geopotential_to_geopotential_heights(self, test_ds = test_ds):
+        """
+        Test for conversions between geopotential to geopotential heights
+        """
+        test_ds = convert_pressure_to_pascals(test_ds)
+        original = test_ds['z'].copy()
+        test_ds = geopotential_to_geopotential_heights(test_ds)
+
+        self.assertTrue('gph' in test_ds.data_vars)
+
+        assert_allclose(original/9.81, test_ds['gph'])
+
     def test_interpolate_to_heights(self, test_ds = test_ds):
+        """
+        Test for interpolating from pressure levels as coordinate and geopotential 
+        height as data variable to geopotential heights as indexing coordinate.
+        """
         test_ds = convert_pressure_to_pascals(test_ds)
         test_ds = geopotential_to_geopotential_heights(test_ds)
         test_ds['vpr'] = xr.DataArray(np.random.random((10, 10, 37, 1)),\

@@ -2,6 +2,8 @@ import numpy as np
 import xarray as xr
 from scipy import integrate
 
+from typing import Union
+
 def calculate_dry_refractivity(dataset: xr.Dataset) -> xr.Dataset:
     """
     Calculate dry/hydro-static refractivity from air pressure, vapor pressure, and temperature
@@ -14,8 +16,10 @@ def calculate_dry_refractivity(dataset: xr.Dataset) -> xr.Dataset:
     dataset: xarray dataset with dry refractivity added
     """
 
-    assert dataset['air_pressure'].attrs['units'] == 'pascals'
-    assert dataset['temperature'].attrs['units'] == 'K'
+    if 'units' in dataset['air_pressure'].attrs:
+        assert dataset['air_pressure'].attrs['units'] == 'pascals'
+    if 'units' in dataset['temperature'].attrs:
+        assert dataset['temperature'].attrs['units'] == 'K'
     
     # constant for dry refractivity
     k1 = 0.776 # K / Pa
@@ -44,8 +48,10 @@ def calculate_wet_refractivity(dataset: xr.Dataset) -> xr.Dataset:
     dataset: xarray dataset with wet refractivity added
     """
 
-    assert dataset['vapor_pressure'].attrs['units'] == 'pascals'
-    assert dataset['temperature'].attrs['units'] == 'K'
+    if 'units' in dataset['vapor_pressure'].attrs:
+        assert dataset['vapor_pressure'].attrs['units'] == 'pascals'
+    if 'units' in dataset['temperature'].attrs:
+        assert dataset['temperature'].attrs['units'] == 'K'
 
     if not np.all(np.diff(dataset.height, 1) > 0):
         # reverse heights so we integrate from satellite to ground (high -> low)
@@ -108,7 +114,7 @@ def calculate_refractive_indexes(dataset: xr.Dataset, wavelength: float = 0.23) 
 
     return dataset
 
-def get_delay(dataset: xr.Dataset, geometry: xr.Dataset, wavelength: float = 4*np.pi) -> xr.Dataset:
+def get_delay(dataset: xr.Dataset, dem: xr.DataArray, inc: Union[xr.DataArray, float], wavelength: float = 4*np.pi) -> xr.Dataset:
     """
     Get delay in m (default) or radians (if wavelength provided) for each height
     https://github.com/insarlab/PyAPS/blob/244552cdfcf4e1a55de5f1439be4f08eb45872ec/src/pyaps3/objects.py#L213
@@ -123,23 +129,41 @@ def get_delay(dataset: xr.Dataset, geometry: xr.Dataset, wavelength: float = 4*n
     delay: cos calculated phase delay for each weather station data point interpolated to each meter of DEM
     """
 
-    assert 'N' in dataset.data_vars
-    assert 'dem' in geometry.data_vars
-    assert 'inc' in geometry.data_vars
+    assert wavelength > 0, "Can not have negative wavelength"
 
-    if geometry['inc'].mean() > 10: print(f'Incidence mean over 10. Check if you are inc in radians')
+    assert 'N' in dataset.data_vars, "Must have refractivity index calculated to interpolate to DEM"
+
+    if isinstance(inc, xr.DataArray):
+
+        assert inc.mean() < 2*np.pi, f'Incidence mean over 2 pi. Check if you are inc in radians'
+
+        # check to see if incidence angle and DEM are aligned and align them if not
+        try:
+            xr.align(dem, inc, join='exact')
+        except ValueError:
+            inc = inc.interp_like(dem)
+
+            # check if we got rid of all the values due to no overlap
+            assert inc.isnull().sum() != dem.size, "No overlap between incidence angle and dem"
+
+    else:
+        assert inc < 2*np.pi, f'Incidence mean over 2 pi. Check if you are inc in radians'
+    
+    # check if atmospheric values cover the dem
+    assert dataset.height.min() <= dem.min()
+    assert dataset.height.max() >= dem.max()
 
     # interpolate heights to each meter from the lowest point of the dem to the highest from our current spacing
-    dataset = dataset.interp(height = np.round(np.arange(geometry['dem'].min() - 2, geometry['dem'].max() + 2)), method = 'linear')
+    dataset = dataset.interp(height = np.round(np.arange(dem.min() - 2, dem.max() + 2)), method = 'linear')
 
     # interpolate across the dem's lats, longs, and elevations to find the surface delay
-    dataset = dataset.interp(latitude = geometry.y, longitude = geometry.x, height = geometry['dem'])
+    dataset = dataset.interp(latitude = dem.latitude, longitude = dem.longitude, height = dem)
 
     # add phase delay data_variable
-    dataset['delay'] = dataset['N']*np.pi*4.0/(wavelength*geometry['inc'])
+    dataset['delay'] = dataset['N']*np.pi*4.0/(wavelength*np.cos(inc))
 
     # make sure we have coordinates in the right order for plotting
-    dataset = dataset.transpose('time','y','x')
+    dataset = dataset.transpose('time','latitude','longitude')
 
     return dataset
     
