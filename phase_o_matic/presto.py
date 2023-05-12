@@ -30,6 +30,7 @@ def presto_phase_delay(date: pd.Timestamp,
     out_name: if None won't save. otherwise will save in work_dir as {out_name}.nc
     """
 
+    # error checking on arguments
     if not isinstance(date, pd.Timestamp):
         try:
             date = pd.to_datetime(date)
@@ -51,23 +52,48 @@ def presto_phase_delay(date: pd.Timestamp,
     assert work_dir.exists(), f"Working directory {work_dir} does not exist."
     assert work_dir.is_dir(), f"Working directory {work_dir} is not a directory."
 
+    assert isinstance(wavelength, float), "Wavelength must be a float. Provided: {wavelength}"
+
+    # done error checking on arguments
+
     if not isinstance(subset, Polygon):
         subset = box(*dem.rio.bounds())
 
-    assert isinstance(wavelength, float), "Wavelength must be a float. Provided: {wavelength}"
-
+    # download ERA5 images to work directory subdirectory
     work_dir.joinpath('ERA5').mkdir(exist_ok = True)
-    
-    out_fp = download_era(date, out_dir = work_dir.joinpath('ERA5'), subset = subset, humid_param = 'specific_humidity')
-    era = xr.open_dataset(out_fp)
+
+    era_fp = download_era(date, out_dir = work_dir.joinpath('ERA5'), subset = subset, humid_param = 'specific_humidity')
+
+    # open era5 
+    era = xr.open_dataset(era_fp)
+
+    # convert to pascals
     era = convert_pressure_to_pascals(era)
+
+    # get vapor pressure data from humidity
     era = get_vapor_partial_pressure(era)
+
+    # convert geopotential 'z' to geopotential heights 'gph'
     era = geopotential_to_geopotential_heights(era)
-    ds = interpolate_to_heights(era, min_alt = dem.min(), max_alt = dem.max())        
+
+    # interpolate from pressure levels as coordinate of geopotential heights
+    # to geopotential heights as coordinate of other variables
+    ds = interpolate_to_heights(era, min_alt = dem.min(), max_alt = dem.max())
+
+    # calculate refractive indexes (N, N_dry, N_wet)
     ds = calculate_refractive_indexes(ds)
+
+    # get the delay in radians or meters
     ds = get_delay(ds, dem, inc, wavelength = wavelength)
 
+    # save output if we have a provided out_name
     if isinstance(out_name, str):
-        ds.to_netcdf(work_dir.joinpath(out_name))
+        out_fp = work_dir.joinpath(out_name).with_suffix('.nc')
+        
+        # add in check/warning for existence and overwrite later
+        if out_fp.exists():
+            pass
+        else:
+            ds.to_netcdf(out_fp)
 
     return ds

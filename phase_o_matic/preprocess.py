@@ -15,12 +15,17 @@ def convert_pressure_to_pascals(dataset: xr.Dataset) -> xr.Dataset:
     dataset: xarray dataset with coordinate level in pascals
     """
 
-    if dataset['level'].attrs['units'] != 'pascals':
-        dataset['level'] = dataset['level'] * 100
-        dataset['level'] = dataset['level'].assign_attrs(units = 'pascals', long_name = 'pressure_level')
+    assert 'units' in dataset['level'].attrs, "No assigned units for pressure levels ['level']"
 
-    else:
+    if dataset['level'].attrs['units'] == 'millibars':
+        dataset['level'] = dataset['level'] * 100
+        dataset['level'] = dataset['level'].assign_attrs(units = 'pascals', long_name = 'Pressure Level')
+    elif dataset['level'].attrs['units'] == 'pascals':
         print("Pressure levels already converted to pascals")
+    else:
+        raise ValueError(f"Unknown units on 'level' coordinate: {dataset['level'].attrs['units']}\
+            must be one of 'pascals' or 'millibars'")
+    
 
     return dataset
 
@@ -43,19 +48,19 @@ def cc_era(temperature: xr.DataArray):
     T3  = 273.16
     Ti  = 250.16
 
-    esta = xr.zeros_like(temperature)
+    sat_vapor_pressure = xr.zeros_like(temperature)
 
     esatw = a1w*np.exp(a3w*(temperature-T3)/(temperature-a4w))
     esati = a1i*np.exp(a3i*(temperature-T3)/(temperature-a4i))
     wgt = (temperature-Ti)/(T3-Ti)
 
-    esta = esta.where(esta < T3, esatw)
-    esta = esta.where(esta > Ti, esati)
-    esta = esta.where((esta >= T3) | (esta <= Ti), esati + (esatw - esati)*wgt*wgt)
+    sat_vapor_pressure = sat_vapor_pressure.where(temperature < T3, esatw)
+    sat_vapor_pressure = sat_vapor_pressure.where(temperature > Ti, esati)
+    sat_vapor_pressure = sat_vapor_pressure.where((temperature >= T3) | (temperature <= Ti), esati + (esatw - esati)*wgt*wgt)
 
-    esta = esta.rename('vapor_saturation_pressure')
+    sat_vapor_pressure = sat_vapor_pressure.rename('vapor_saturation_pressure')
 
-    return esta
+    return sat_vapor_pressure
 
 def get_vapor_partial_pressure(dataset: xr.Dataset) -> xr.Dataset:
     """
@@ -78,9 +83,7 @@ def get_vapor_partial_pressure(dataset: xr.Dataset) -> xr.Dataset:
         # specific humidity calculation of partial pressure of water vapour
         # https://cran.r-project.org/web/packages/humidity/vignettes/humidity-measures.html equation 4
         # http://www.atmo.arizona.edu/students/courselinks/spring08/atmo336s1/courses/fall13/atmo551a/Site/ATMO_451a_551a_files/WaterVapor.pdf
-        # dataset['vpr'] = dataset['q'] * dataset['level'] / (alpha + (1 - alpha) * dataset['q'])
         dataset['vpr'] = dataset['q'] * dataset['level'] * alpha/ (1+ (alpha - 1)* dataset['q'])
-        # dataset['vpr'] = dataset['q'] * dataset['level']  - 0.622 * dataset['level'] / 100
 
     elif 'r' in dataset.data_vars:
         h2o_sat_partial_p = cc_era(dataset['t'])
@@ -90,12 +93,13 @@ def get_vapor_partial_pressure(dataset: xr.Dataset) -> xr.Dataset:
         raise ValueError("Must have specific or relative humidity as a data variable")
 
     dataset['vpr'].attrs['units'] = 'pascals'
+    dataset['vpr'].attrs['long_name'] = 'Vapor Partial Pressure'
 
     return dataset
 
 def geopotential_to_geopotential_heights(ds: xr.Dataset) -> xr.Dataset:
     """
-    Convert height array from geopotential to WGS84 Ellipsoidal heights
+    Convert height array from geopotential to geopotential heights
 
     Args:
     ds: xarray dataset with geopotentials
@@ -108,45 +112,9 @@ def geopotential_to_geopotential_heights(ds: xr.Dataset) -> xr.Dataset:
     # convert from geopotential to geopotenial height
     ds['gph'] = ds['z'] / g
 
+    ds['gph'] = ds['gph'].assign_attrs(units = 'meters', long_name = 'Geopotential Height')
+
     return ds
-
-def check_start_end(hx, min_alt, max_alt):
-    """
-    Check if we need to extend hx to cover min alt to max alt
-    Included to test relative to pyaps but probably not neccessary
-    """
-    start_flag = False
-    end_flag = False
-    #Add point at start
-    if (hx.min() > min_alt):
-        start_flag = True
-        #changed from 1 to 0 (-1 should also work), CL
-        hx = np.concatenate(([min_alt-1], hx),axis = 0)
-
-    #Add point at end
-    if (hx.max() < max_alt):
-        end_flag = True
-        #changed from 1 to 0 (-1 should also work), CL
-        hx = np.concatenate((hx,[max_alt+1]),axis=0)
-    
-    return hx, start_flag, end_flag
-
-def hy_extend(hx, hy, start_flag, end_flag):
-    """
-    Extend hy to cover full range of min to max altitude.
-    Included to test relative to pyaps but probably not neccessary
-    """
-    if (start_flag == True):
-        val = hy[-1] +(hx[-1] - hx[-2])* (hy[-1] - hy[-2])/(hx[-2]-hx[-3])
-        #changed from 1 to 0 (-1 should also work), CL
-        hy = np.concatenate((hy,[val]),axis=0)
-
-    if (end_flag == True):
-        val = hy[0] - (hx[0] - hx[1]) * (hy[0] - hy[1])/(hx[1]-hx[2])
-        #changed from 1 to 0 (-1 should also work), CL
-        hy = np.concatenate(([val],hy),axis=0)
-    
-    return hy
 
 def interpolate_to_heights(dataset: xr.Dataset, min_alt = -200, n_heights = 300, max_alt: Union[None, float, xr.DataArray] = None) -> xr.Dataset:
     """
@@ -182,7 +150,7 @@ def interpolate_to_heights(dataset: xr.Dataset, min_alt = -200, n_heights = 300,
             coords = {
                 "longitude" : (["longitude"], dataset['longitude'].data, dataset['longitude'].attrs),
                 "latitude" : (["latitude"], dataset['latitude'].data, dataset['latitude'].attrs),
-                "height" : (["height"], heights, {'units' :'meters', 'long_name' :'geopotential_heights'}),
+                "height" : (["height"], heights, dataset['gph'].attrs),
                 "time" : (["time"], dataset['time'].data, {'long_name' :'time'}),
             },
             attrs=dataset.attrs
@@ -220,5 +188,7 @@ def interpolate_to_heights(dataset: xr.Dataset, min_alt = -200, n_heights = 300,
                 tck = interpolate.interp1d(hx, hy, axis = -1, kind = 'cubic', fill_value = "extrapolate")
                 interpolated_vapor= tck(heights)
                 interpolated_ds['vapor_pressure'].loc[{'time': time,  'latitude': lat, 'longitude': lon}] =  xr.DataArray(interpolated_vapor, coords = [heights], dims = 'height')
-        
+    
+    interpolated_ds['air_pressure']= interpolated_ds.air_pressure.assign_attrs(long_name = 'Air Pressure')
+
     return interpolated_ds

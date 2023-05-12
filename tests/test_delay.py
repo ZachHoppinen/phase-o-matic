@@ -65,6 +65,9 @@ class TestDelay(unittest.TestCase):
         original = original.reindex(height=list(reversed(original.height)))
         assert_allclose(test_ds['N_dry'], 1.0e-6 * 0.776 * 287.05 / 9.81 * (original['air_pressure']  - original['air_pressure'].isel(height = -1)))
 
+        self.assertEqual(test_ds['N_dry'].units, '')
+        self.assertEqual(test_ds['N_dry'].long_name, 'Hydrostatic Refractivity')
+
     def test_dry_refractivity_errors(self, test_ds = test_ds):
         """
         Test for correct errors in dry refractivity
@@ -103,6 +106,9 @@ class TestDelay(unittest.TestCase):
         elif Path('./test_data/wet_N_seed_1.npy').exists():
             N_wet_correct = np.load('./test_data/wet_N_seed_11.npy')
             assert_allclose(test_ds['N_wet'].data, N_wet_correct)
+
+        self.assertEqual(test_ds['N_wet'].units, '')
+        self.assertEqual(test_ds['N_wet'].long_name, 'Water Vapor Refractivity')
     
     def test_wet_refractivity_errors(self, test_ds = test_ds):
         """
@@ -149,6 +155,9 @@ class TestDelay(unittest.TestCase):
         
         if "N_wet_correct" in locals():
             assert_allclose(test_ds['N'].data, N_wet_correct + N_dry_correct)
+        
+        self.assertEqual(test_ds['N'].units, '')
+        self.assertEqual(test_ds['N'].long_name, 'Total Refractivity')
     
     dem = xr.DataArray(np.linspace(1000, 3000, 200*300).reshape(200, 300),
                     coords = [np.linspace(43, 45, 200), np.linspace(-116, -115, 300)],
@@ -201,6 +210,8 @@ class TestDelay(unittest.TestCase):
         self.assertEqual(test_ds['delay'].attrs['units'], 'radians')
 
         assert_allclose(test_ds['delay'].data, 4 * np.pi * delay_correct / 10)
+
+        self.assertEqual(test_ds['delay'].long_name, 'Atmospheric Delay')
         
         
     def test_get_delay_errors(self, test_ds = test_ds, dem = dem, inc = inc):

@@ -35,6 +35,8 @@ def calculate_dry_refractivity(dataset: xr.Dataset) -> xr.Dataset:
     # https://agupubs.onlinelibrary.wiley.com/doi/epdf/10.1002/2013JB010588?src=getftr
     dataset['N_dry'] = 1.0e-6 * k1 * Rd / g * (dataset['air_pressure'] - dataset['air_pressure'].isel(height = -1))
 
+    dataset['N_dry'] = dataset['N_dry'].assign_attrs(units = '', long_name = 'Hydrostatic Refractivity')
+
     return dataset
 
 def calculate_wet_refractivity(dataset: xr.Dataset) -> xr.Dataset:
@@ -90,6 +92,8 @@ def calculate_wet_refractivity(dataset: xr.Dataset) -> xr.Dataset:
 
     # get change from highest elevation
     dataset['N_wet'] = dataset['N_wet'] - dataset['N_wet'].isel(height = -1)
+
+    dataset['N_wet'] = dataset['N_wet'].assign_attrs(units = '', long_name = 'Water Vapor Refractivity')
     
     return dataset
 
@@ -111,6 +115,8 @@ def calculate_refractive_indexes(dataset: xr.Dataset, wavelength: float = 0.23) 
     dataset = calculate_wet_refractivity(dataset)
     # combine wet and dry refractivity
     dataset['N'] = dataset['N_dry'] + dataset['N_wet']
+
+    dataset['N'] = dataset['N'].assign_attrs(units = '', long_name = 'Total Refractivity')
 
     return dataset
 
@@ -169,7 +175,8 @@ def get_delay(dataset: xr.Dataset, dem: xr.DataArray, inc: Union[xr.DataArray, f
         dataset['delay'].attrs['units'] = 'meters'
     else:
         dataset['delay'].attrs['units'] = 'radians'
-    dataset['delay'].attrs['long_name'] = 'atmospheric delay'
+
+    dataset['delay'].attrs['long_name'] = 'Atmospheric Delay'
 
     # make sure we have coordinates in the right order for plotting
     dataset = dataset.transpose('time','latitude','longitude')
