@@ -171,6 +171,8 @@ class TestDelay(unittest.TestCase):
 
         self.assertTrue('delay' in test_ds.data_vars)
 
+        self.assertEqual(test_ds['delay'].attrs['units'], 'meters')
+
         directory = Path(__file__).parent.resolve()
         if directory.joinpath('test_data/delay_seed_1.npy').exists():
             delay_correct = np.load('./tests/test_data/delay_seed_1.npy')
@@ -195,6 +197,8 @@ class TestDelay(unittest.TestCase):
             test_ds = get_delay(test_ds, dem, inc = inc, wavelength = 10)
         except:
             self.fail('Failed using non default wavelength')
+        
+        self.assertEqual(test_ds['delay'].attrs['units'], 'radians')
 
         assert_allclose(test_ds['delay'].data, 4 * np.pi * delay_correct / 10)
         

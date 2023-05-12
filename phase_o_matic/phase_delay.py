@@ -121,8 +121,8 @@ def get_delay(dataset: xr.Dataset, dem: xr.DataArray, inc: Union[xr.DataArray, f
 
     Args:
     ds: xarray dataset of atmosphere with refractive indexes calculated
-    geometry: xarray dataset of elevations (var_name = 'dem'), incidence angles in radians (var_name = 'inc')
-        and coords for "y" and "x".
+    dem: xarray dataArray of elevations with coords for "latitude" and "longitude".
+    inc: xarray dataArray of incidence angles in radians or a single float to use over the image
     wavelength: either default 4 * pi (returns meters of delay) or radar wavelength in meters (returns radians)
 
     Returns:
@@ -132,6 +132,9 @@ def get_delay(dataset: xr.Dataset, dem: xr.DataArray, inc: Union[xr.DataArray, f
     assert wavelength > 0, "Can not have negative wavelength"
 
     assert 'N' in dataset.data_vars, "Must have refractivity index calculated to interpolate to DEM"
+
+    assert "latitude" in dem.coords, "Must have latitude as coordinate"
+    assert "longitude" in dem.coords, "Must have longitude as coordinate"
 
     if isinstance(inc, xr.DataArray):
 
@@ -161,6 +164,12 @@ def get_delay(dataset: xr.Dataset, dem: xr.DataArray, inc: Union[xr.DataArray, f
 
     # add phase delay data_variable
     dataset['delay'] = dataset['N']*np.pi*4.0/(wavelength*np.cos(inc))
+
+    if wavelength == 4 * np.pi:
+        dataset['delay'].attrs['units'] = 'meters'
+    else:
+        dataset['delay'].attrs['units'] = 'radians'
+    dataset['delay'].attrs['long_name'] = 'atmospheric delay'
 
     # make sure we have coordinates in the right order for plotting
     dataset = dataset.transpose('time','latitude','longitude')

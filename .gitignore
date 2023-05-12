@@ -162,4 +162,4 @@ cython_debug/
 data/
 PyAPS/
 
-PyAPS_data/example/*.nc
+PyAPS_data/example/**/*
