@@ -44,6 +44,9 @@ class TestPreprocess(unittest.TestCase):
         Test converting to pascals from bars
         """
         original = test_ds.copy(deep = True)
+
+        test_ds['level'] = test_ds['level'].assign_attrs(units = 'millibars')
+
         ds = convert_pressure_to_pascals(test_ds)
 
         self.assertEqual(ds['level'].units, 'pascals')
@@ -53,7 +56,7 @@ class TestPreprocess(unittest.TestCase):
         # check to be sure it won't double convert
         ds = convert_pressure_to_pascals(ds)
 
-        assert_allclose(ds['level'], original['level']*100)
+        assert_allclose(ds['level'], original['level']*100, err_msg='Failed on double conversion')
         self.assertEqual(ds['level'].units, 'pascals')
         self.assertEqual(ds['level'].long_name, 'Pressure Level')
 
@@ -103,7 +106,7 @@ class TestPreprocess(unittest.TestCase):
         test_ds = original.copy()
 
         test_ds['r'] = test_ds['q']
-        test_ds = test_ds.drop('q')
+        test_ds = test_ds.drop_vars('q')
 
         ds = get_vapor_partial_pressure(test_ds)
         h20_sat = cc_era(original['t'])
@@ -129,7 +132,7 @@ class TestPreprocess(unittest.TestCase):
         """
 
         original = test_ds.copy()
-        test_ds = test_ds.drop('q')
+        test_ds = test_ds.drop_vars('q')
         self.assertRaises(ValueError, get_vapor_partial_pressure, test_ds)
 
     def test_geopotential_to_geopotential_heights(self, test_ds = test_ds):
@@ -183,11 +186,11 @@ class TestPreprocess(unittest.TestCase):
             assert_allclose(ds[coords], test_ds[coords], err_msg=f"Failed on coordinate compare: {coords}")
         
         ds = interpolate_to_heights(test_ds, min_alt=-20)
-        self.assertEquals(ds.height.min(), -20)
-        self.assertAlmostEquals(ds.height.max().data, test_ds['gph'].max().round().data , places = 1)
+        self.assertEqual(ds.height.min(), -20)
+        self.assertAlmostEqual(ds.height.max().data, test_ds['gph'].max().round().data , places = 1)
 
         ds = interpolate_to_heights(test_ds, min_alt=0.1)
-        self.assertAlmostEquals(ds.height.min(), 0.1, places = 1)
+        self.assertAlmostEqual(ds.height.min(), 0.1, places = 1)
 
         self.assertEqual(ds['height'].units, 'meters')
         self.assertEqual(ds['height'].long_name, 'Geopotential Height')

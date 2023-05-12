@@ -219,6 +219,7 @@ class TestDelay(unittest.TestCase):
         Test for corret errors through from delay function
         """
 
+        test_ds = test_ds.drop_vars('N')
         self.assertRaises(AssertionError, get_delay, test_ds, dem, inc)
         
         test_ds = calculate_refractive_indexes(test_ds)

@@ -163,3 +163,7 @@ data/
 PyAPS/
 
 PyAPS_data/example/**/*
+
+# mac stuff
+*.DS_Store
+.DS_Store

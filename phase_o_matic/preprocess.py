@@ -21,7 +21,8 @@ def convert_pressure_to_pascals(dataset: xr.Dataset) -> xr.Dataset:
         dataset['level'] = dataset['level'] * 100
         dataset['level'] = dataset['level'].assign_attrs(units = 'pascals', long_name = 'Pressure Level')
     elif dataset['level'].attrs['units'] == 'pascals':
-        print("Pressure levels already converted to pascals")
+        pass
+        # print("Pressure levels already converted to pascals")
     else:
         raise ValueError(f"Unknown units on 'level' coordinate: {dataset['level'].attrs['units']}\
             must be one of 'pascals' or 'millibars'")

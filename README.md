@@ -2,6 +2,8 @@
 [![PIP](https://img.shields.io/badge/pip-0.0.8-purple)](https://img.shields.io/badge/pip-0.0.8-purple)
 [![LICENSE](https://img.shields.io/badge/license-MIT-orange)](https://img.shields.io/badge/license-MIT-orange)
 [![DOI](https://zenodo.org/badge/636333382.svg)](https://zenodo.org/badge/latestdoi/636333382) 
+[![COVERAGE](https://img.shields.io/badge/coverage-89%-green)](https://img.shields.io/badge/coverage-89%-green) 
+
 
 Python package for calculating Interferometric Synthetic Aperture Radar phase delays from ERA5 atmospheric models. Utilizes xarray to easily download, processes, and add phase delays to netcdfs of InSAR Phase.
 
@@ -70,6 +72,17 @@ fig, axes = plt.subplots(1, 2, figsize = (12, 9))
 delay_change.plot(ax = axes[0], vmax = 0, vmin = -4)
 dem.plot(ax = axes[1], vmin = 0, vmax = 2000)
 plt.savefig('../images/usage.png')
+```
+
+## Coverage instructions
+
+Run the following from the main directory of this file to get a coverage report.
+
+You will need to have the dependencies and `coverage` packages available.
+
+```bash
+python -m coverage run -m unittest discover -s ./tests
+python -m coverage report
 ```
 
 ## Citations
