@@ -35,10 +35,16 @@ def presto_phase_delay(date: pd.Timestamp,
         try:
             date = pd.to_datetime(date)
         except:
-            raise(f"Unable to parse date string {date} to pandas timestamp.")
+            raise ValueError(f"Unable to parse date string {date} to pandas timestamp.")
 
     assert isinstance(dem, xr.DataArray), "Second positional argument dem must be a xr.DataArray"
     assert isinstance(inc, xr.DataArray), "third positional argument inc must be a xr.DataArray"
+
+    for geom_ds, name in zip([dem, inc], ['dem', 'inc']):
+        for old_name, coord in zip(['y', 'x'], ['latitude', 'longitude']):
+            assert coord in geom_ds.coords, f"{name} xarray must use coordinate names latitude. Currently "\
+                f"has coords {geom_ds.coords._names}. Consider using the xarray dataarray method:  "\
+                f"{name}_ds.rename(dict(old_{old_name}_coord_name = '{coord}'))"
     
     if not isinstance(work_dir, Path):
         if isinstance(work_dir, str):
