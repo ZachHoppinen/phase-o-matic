@@ -89,7 +89,7 @@ python -m coverage report
 
 If you end up finding this repo useful consider citing this repo as:
 
-Keskinen, Z. (2023) Phase-o-matic: InSAR atmospheric delay calculations, https://github.com/ZachKeskinen/phase-o-matic/. DOI: 10.5281/zenodo.7926686
+Hoppinen, Z. (2023) Phase-o-matic: InSAR atmospheric delay calculations, https://github.com/ZachKeskinen/phase-o-matic/. DOI: 10.5281/zenodo.7926686
 
 and any use of the ERA5 data should include the ERA5 data citation:
 
