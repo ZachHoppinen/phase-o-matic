@@ -1,0 +1,12 @@
+name: phaseomatic
+channels:
+ - conda-forge
+ - defaults
+dependencies:
+ - numpy
+ - pandas
+ - xarray
+ - rioxarray
+ - shapely
+ - cdsapi
+ - scipy
