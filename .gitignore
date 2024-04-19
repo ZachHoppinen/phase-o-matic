@@ -167,3 +167,5 @@ PyAPS_data/example/**/*
 # mac stuff
 *.DS_Store
 .DS_Store
+
+local/
